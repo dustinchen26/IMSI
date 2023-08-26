@@ -1,0 +1,109 @@
+<!-- 
+  Copyright © [2023] [Dustin_Chen]. All rights reserved.
+  Author: Dustin_Chen
+  Email:  Dustin_Chen@compal.com or chuhpsdustin@gmail.com
+-->  
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IMSI 工具</title>
+    <script>
+        function parseIMSI() {
+            var imsiInput = document.getElementById("imsiInput").value;
+            
+            if (imsiInput.length !== 15) {
+                document.getElementById("output").innerText = "IMSI 长度必须为 15 位";
+                return;
+            }
+
+            // 在 4 前面补 9
+            var imsiPadded = "9" + imsiInput;
+
+            // 构建输出 Byte 数组
+            var byteOutput = "Byte = {";
+            for (var i = 0; i < imsiPadded.length; i += 2) {
+                var bcdSegment = " 0x" + imsiPadded.substr(i + 1, 1) + imsiPadded.substr(i, 1);
+                byteOutput += bcdSegment + ",";
+            }
+            byteOutput = byteOutput.slice(0, -1); // 去除末尾的逗号
+            byteOutput += " }";
+
+            document.getElementById("imsiBCDOutput").innerText = byteOutput;
+
+            // 分割 IMSI 为 MCC、MNC 和 MSIN 部分
+            var mcc = imsiInput.substr(0, 3);
+            var mnc = imsiInput.substr(3, 2);
+            var msin = imsiInput.substr(5);
+
+            // 构建输出字符串，显示解析结果
+            var output = "Mobile Country Code (MCC): " + mcc + "\n" +
+                         "Mobile Network Code (MNC): " + mnc + "\n" +
+                         "MSIN: " + msin;
+            
+            document.getElementById("output").innerText = output;
+        }
+
+        function reverseParseIMSI() {
+            var byteInput = document.getElementById("byteInput").value;
+
+            // 移除字符串中的空格和"0x"，并按逗号分割
+            var byteSegments = byteInput.replace(/\s|0x/g, '').split(',');
+
+            console.log("byteSegments:", byteSegments);
+
+            // 构建 IMSI BCD 数组
+            var imsiBCD = "";
+            for (var i = 0; i < byteSegments.length; i++) {
+                imsiBCD += byteSegments[i];
+            }
+
+            console.log("imsiBCD:", imsiBCD);
+
+// 反转每两个字符
+var reversedIMSI = "";
+for (var i = 0; i < imsiBCD.length; i += 2) {
+    var bcdSegment = imsiBCD.substr(i, 2);
+    var reversedSegment = bcdSegment[1] + bcdSegment[0];
+    reversedIMSI += reversedSegment;
+}
+
+
+            console.log("reversedIMSI:", reversedIMSI);
+
+            // 去除前面的9
+            reversedIMSI = reversedIMSI.substr(1);
+
+            console.log("reversedIMSI without 9:", reversedIMSI);
+
+            // 分割 IMSI 各个部分
+            var mcc = reversedIMSI.substr(0, 3);
+            var mnc = reversedIMSI.substr(3, 2);
+            var msin = reversedIMSI.substr(5);
+
+            // 构建输出字符串，显示解析结果
+            var output = "IMSI: " + reversedIMSI + "\n" +
+                         "Mobile Country Code (MCC): " + mcc + "\n" +
+                         "Mobile Network Code (MNC): " + mnc + "\n" +
+                         "MSIN: " + msin;
+
+            document.getElementById("output2").innerText = output;
+        }
+    </script>
+</head>
+<body>
+    <h1>IMSI 工具</h1>
+    <p style="margin: 0;">Author: Dustin_Chen, email: <a href="mailto:Dustin_Chen@compal.com" style="line-height: 1;">Dustin_Chen@compal.com</a> or <a href="mailto:chuhpsdustin@gmail.com" style="line-height: 1;">chuhpsdustin@gmail.com</a></p>
+    <h2>IMSI 解析</h2>
+    <label for="imsiInput">请输入 IMSI (ex: 466660000055241)：</label>
+    <input type="text" id="imsiInput" maxlength="15">
+    <button onclick="parseIMSI()">解析</button>
+    <div id="output"></div>
+    <div id="imsiBCDOutput"></div>
+    
+    <h2>Byte 反向提取为 IMSI</h2>
+    <label for="byteInput">请输入 Byte (ex: 0x49, 0x66, 0x66, 0x00, 0x00, 0x50, 0x25, 0x14)：</label>
+    <input type="text" id="byteInput">
+    <button onclick="reverseParseIMSI()">提取</button>
+    <div id="output2"></div>
+</body>
+</html>
