@@ -2,21 +2,30 @@
   Copyright © [2023] [Dustin_Chen]. All rights reserved.
   Author: Dustin_Chen
   Email:  Dustin_Chen@compal.com or chuhpsdustin@gmail.com
--->  
+-->
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>IMSI 工具</title>
+    <title>IMSI Byte Converter</title>
     <style>
-        /* 添加輸入框的寬度樣式 */
-        input {
-            width: 300px; /* 調整寬度為適合的大小 */
+
+        body {
+            line-height: 1;
+            font-size: 16px;
+            font-family: Roboto, sans-serif;
         }
+		
+        pre {
+            line-height: 1;
+            font-size: 14px;
+        }
+		
     </style>
     <script>
         function parseIMSI() {
             var imsiInput = document.getElementById("imsiInput").value;
-            
+
             if (imsiInput.length !== 15) {
                 document.getElementById("output").innerText = "IMSI 長度必須為 15 位";
                 return;
@@ -26,7 +35,7 @@
             var imsiPadded = "9" + imsiInput;
 
             // 構建輸出 Byte 陣列
-            var byteOutput = "● QXDM IMSI, Byte = {";
+            var byteOutput = "QXDM IMSI, Byte = {";
             for (var i = 0; i < imsiPadded.length; i += 2) {
                 var bcdSegment = " 0x" + imsiPadded.substr(i + 1, 1) + imsiPadded.substr(i, 1);
                 byteOutput += bcdSegment + ",";
@@ -41,11 +50,11 @@
             var mnc = imsiInput.substr(3, 2);
             var msin = imsiInput.substr(5);
 
-            // 構建輸出字串，顯示解析結果
-            var output = "-> Mobile Country Code (MCC): " + mcc + "\n" +
-                         "-> Mobile Network Code (MNC): " + mnc + "\n" +
-                         "-> MSIN: " + msin;
-            
+            // 構建輸出字串，顯示convert結果
+            var output = "Mobile Country Code (MCC): " + mcc + "\n" +
+                "Mobile Network Code (MNC): " + mnc + "\n" +
+                "MSIN: " + msin;
+
             document.getElementById("output").innerText = output;
         }
 
@@ -85,15 +94,15 @@
             var mnc = reversedIMSI.substr(3, 2);
             var msin = reversedIMSI.substr(5);
 
-            // 構建輸出字串，顯示解析結果
-            var output = "● IMSI: " + reversedIMSI + "\n" +
-                         "-> Mobile Country Code (MCC): " + mcc + "\n" +
-                         "-> Mobile Network Code (MNC): " + mnc + "\n" +
-                         "-> MSIN: " + msin;
+            // 構建輸出字串，顯示convert結果
+            var output = "IMSI: " + reversedIMSI + "\n" +
+                "Mobile Country Code (MCC): " + mcc + "\n" +
+                "Mobile Network Code (MNC): " + mnc + "\n" +
+                "MSIN: " + msin;
 
             document.getElementById("output2").innerText = output;
         }
-        
+
         // 將 imsInput 和 byteInput 的值設置為示例值
         window.onload = function () {
             document.getElementById("imsiInput").value = "466660000055241";
@@ -101,37 +110,80 @@
         };
     </script>
 </head>
+
 <body>
-    <h1>IMSI 工具</h1>
-    <p style="margin: 0;">Author: Dustin_Chen, email: <a href="mailto:Dustin_Chen@compal.com" style="line-height: 1;">Dustin_Chen@compal.com</a> or <a href="mailto:chuhpsdustin@gmail.com" style="line-height: 1;">chuhpsdustin@gmail.com</a></p>
-	<p>Ref: ETSI TS 123 003 chap 2.2  Composition of IMSI  </p>
-    &nbsp;&nbsp;&nbsp;&nbsp;<img src="https://raw.githubusercontent.com/dustinchen26/IMSI/d154db48a5aa940a3cf45a006347ddca26678c97/formula.png" alt="GitHub Image" width="700">
-					
-    <h2>IMSI 解析</h2>
-    <label for="imsiInput">// Wireshark log<br>IMSI (15 digits)：</label>
-    <input type="text" id="imsiInput" maxlength="15">
-    <button onclick="parseIMSI()">解析</button>
-    <div id="output"></div>
-    <div id="imsiBCDOutput"></div>
-    
-    <h2>Byte 反向提取為 IMSI</h2>
-    <label for="byteInput">// QXDM log IMSI<br>Byte：</label>
-    <input type="text" id="byteInput">
-    <button onclick="reverseParseIMSI()">提取</button>
-    <div id="output2"></div>
-<p><br>=========================================================</p>	
-	<pre>
+    <h1>IMSI Byte Converter</h1>
+    <p style="margin: 0;">Author: Dustin_Chen, email: <a href="mailto:Dustin_Chen@compal.com"
+            style="line-height: 1;">Dustin_Chen@compal.com</a> or <a href="mailto:chuhpsdustin@gmail.com"
+            style="line-height: 1;">chuhpsdustin@gmail.com</a></p>
+
+    <ul>
+        <li>
+            <strong>Refer 3GPP Spec: </strong>
+            <ul>
+                <li>
+                    ETSI TS 123 003 chap 2.2 Composition of IMSI <br>
+                    <img src="https://raw.githubusercontent.com/dustinchen26/IMSI/master/formula.png" alt="GitHub Image"
+                        width="600">
+                </li>
+                <li>
+                    GSM 11.11 Version 5.1.0 March 1996 <br>
+                    <img src="https://raw.githubusercontent.com/dustinchen26/IMSI/master/PLMN.png" alt="GitHub Image"
+                        width="700">
+                </li>
+            </ul>
+        </li>
+    </ul>
+    <ul>
+        <li>
+            <strong>IMSI to QXDM_Byte </strong>
+            <ul>
+                <li> Please use AT command(ex: adb shell atcli at+cimi) to search for the IMSI of UE mifi and paste 15
+                    digits below
+                    <ul>
+                        <li>
+                            <label for="imsiInput">IMSI: </label>
+                            <input type="text" id="imsiInput" placeholder="ex:466660000055241" maxlength="15" style="width: 140px;">
+                            <button onclick="parseIMSI()">convert</button>
+                            <div id="output"></div>
+                            <div id="imsiBCDOutput" style="color: blue;"></div>
+                        </li>
+                    </ul>
+
+                </li>
+            </ul>
+        </li>
+    </ul>
+    <ul>
+        <li>
+            <strong>QXDM_Byte to IMSI</strong>
+            <ul>
+                <li> Please search IMSI in QXDM and paste IMSI BCD Byte below
+                    <ul>
+                        <li>
+                            <label for="byteInput">Byte：</label>
+                            <input type="text" id="byteInput" placeholder="ex:0x49, 0x66, 0x66, 0x00, 0x00, 0x50, 0x25, 0x14" style="width: 300px;">
+                            <button onclick="reverseParseIMSI()">convert</button>
+                            <div id="output2" style="color: blue;"></div>
+                        </li>
+                    </ul>
+
+                </li>
+            </ul>
+        </li>
+    </ul>
+
+    <pre>
+=========================================================
 【Example】
-	// UE QXDM_log, IMSI Byte = { 0x49, 0x66, 0x66, 0x00, 0x00, 0x50, 0x25, 0x14 }
+	// UE QXDM_log
 	03:45:02.667    SUBSYS RX       [0004/0015]     WCDMA/Additional Status Response          WCDMA L1 State: L1M_STOPPED
 	IMSI BCD Length = 8
-	Byte = { 0x49, 0x66, 0x66, 0x00, 0x00, 0x50, 0x25, 0x14 } 
+	<span style="color: blue;">Byte = { 0x49, 0x66, 0x66, 0x00, 0x00, 0x50, 0x25, 0x14 } </span>
 
-	03:05:13.779    QTRACE          [  47/ 0/2]     MM/LowFreq/High/REG    [reg_send.c   2176] DS: SUB 0 =REG= MMR_REG_REQ PLMN(466-66) RAT(0-GSM,1-W,2-LTE,3-TDS,4-NR5G) = 4 trans_id 232,  scan_scope=0
+	03:05:13.779    QTRACE          [  47/ 0/2]     MM/LowFreq/High/REG    [reg_send.c   2176] DS: SUB 0 =REG= MMR_REG_REQ <span style="color: blue;">PLMN(466-66)</span> RAT(0-GSM,1-W,2-LTE,3-TDS,4-NR5G) = 4 trans_id 232,  scan_scope=0
 	
-	// rantcp-20230726-114645.pcap
-	// MCC= 466, MNC= 66, MSIN= 0000055241
-	// HEX dump: 64 f6 66 f0 ff 00 00 00 00 50 25 14
+	// Wireshark: rantcp-20230726-114645.pcap
 	44	2023-07-26 11:45:31.918911	192.168.45.2	192.168.45.1	F1AP/NR RRC/NAS-5GS	SACK (Ack=5, Arwnd=352516352) , ULRRCMessageTransfer, UL Information Transfer, Identity response MAC=0x00000000							
 	    Message type: Identity response (0x5c)
 	    5GS mobile identity
@@ -140,12 +192,13 @@
      	   .000 .... = SUPI format: IMSI (0)
      	   .... 0... = Spare: 0
       	  .... .001 = Type of identity: SUCI (1)
-      	  Mobile Country Code (MCC): Taiwan (466)
-      	  Mobile Network Code (MNC): Unknown (66)
+      	  <span style="color: blue;">Mobile Country Code (MCC): Taiwan (466)</span>
+      	  <span style="color: blue;">Mobile Network Code (MNC): Unknown (66)</span>
       	  Routing indicator: 0
       	  .... 0000 = Protection scheme Id: NULL scheme (0)
       	  Home network public key identifier: 0
-      	  MSIN: 0000055241
+      	  <span style="color: blue;">MSIN: 0000055241</span>
 	</pre>
 </body>
+
 </html>
